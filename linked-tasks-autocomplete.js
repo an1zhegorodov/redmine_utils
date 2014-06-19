@@ -59,7 +59,7 @@ $(document).ready(function() {
             return /new$/.test(document.URL);
         }
     };
-    
+
     function Parser(query, index) {
         this.query = query;
         this.elIndex = index;
@@ -86,12 +86,12 @@ $(document).ready(function() {
         }
     };
 
-    function BranchParser(query, index) {
+    function NextParser(query, index) {
         Parser.call(this, query, index);
     }
 
-    BranchParser.prototype = new Parser();
-    BranchParser.prototype.prepData = function(el) {
+    NextParser.prototype = new Parser();
+    NextParser.prototype.prepData = function(el) {
         return el.next();
     };
     
@@ -109,23 +109,27 @@ $(document).ready(function() {
     DiffParser.prototype.prepData = function(el) {
         return el.next().children('a').eq(0);
     };
+
     
-    var source_branches_query = 'table.attributes th:contains(Branch)',
-        source_subject_query  = 'div.subject h3',
-        source_diffs_query    = 'table.attributes th:contains(Diff)',
-        br_parser             = new BranchParser(source_branches_query, 0),
-        br_dm_parser          = new BranchParser(source_branches_query, 1),
-        br_cr_parser          = new BranchParser(source_branches_query, 2),
-        subject_parser        = new SubjectParser(source_subject_query, 0),
-        diff_parser           = new DiffParser(source_diffs_query, 0),
-        diff_dm_parser        = new DiffParser(source_diffs_query, 1),
-        diff_cr_parser        = new DiffParser(source_diffs_query, 2),
-        br                    = new Item('redmine_branch', br_parser, localStorage, 'input.issue_custom_field_values_branch', 'select#issue_tracker_id option:selected'),
-        br_dm                 = new Item('redmine_dm_branch', br_dm_parser, localStorage, 'input.issue_custom_field_values_datamodel_branch', 'select#issue_tracker_id option:selected'),
-        br_cr                 = new Item('redmine_cr_branch', br_cr_parser, localStorage, 'input.issue_custom_field_values_crontab_branch', 'select#issue_tracker_id option:selected'),
-    	subject               = new Item('redmine_subject', subject_parser, localStorage, 'input#issue_subject', 'select#issue_tracker_id option:selected');
-    	diff                  = new Item('redmine_diff', diff_parser, localStorage, 'input.issue_custom_field_values_diff_url', 'select#issue_tracker_id option:selected');
-    	diff_dm               = new Item('redmine_dm_diff', diff_dm_parser, localStorage, 'input.issue_custom_field_values_diff_datamodel', 'select#issue_tracker_id option:selected');
-    	diff_cr               = new Item('redmine_cr_diff', diff_cr_parser, localStorage, 'input.issue_custom_field_values_diff_crontab', 'select#issue_tracker_id option:selected');
+    var source_branches_query  = 'table.attributes th:contains(Branch)',
+        source_subject_query   = 'div.subject h3',
+        source_diffs_query     = 'table.attributes th:contains(Diff)',
+        source_task_type_query = 'table.attributes th:contains(Task type)',
+        br_parser              = new NextParser(source_branches_query, 0),
+        br_dm_parser           = new NextParser(source_branches_query, 1),
+        br_cr_parser           = new NextParser(source_branches_query, 2),
+        subject_parser         = new SubjectParser(source_subject_query, 0),
+        task_type_parser       = new NextParser(source_task_type_query, 0),
+        diff_parser            = new DiffParser(source_diffs_query, 0),
+        diff_dm_parser         = new DiffParser(source_diffs_query, 1),
+        diff_cr_parser         = new DiffParser(source_diffs_query, 2),
+        br                     = new Item('redmine_branch', br_parser, localStorage, 'input.issue_custom_field_values_branch', 'select#issue_tracker_id option:selected'),
+        br_dm                  = new Item('redmine_dm_branch', br_dm_parser, localStorage, 'input.issue_custom_field_values_datamodel_branch', 'select#issue_tracker_id option:selected'),
+        br_cr                  = new Item('redmine_cr_branch', br_cr_parser, localStorage, 'input.issue_custom_field_values_crontab_branch', 'select#issue_tracker_id option:selected'),
+    	subject                = new Item('redmine_subject', subject_parser, localStorage, 'input#issue_subject', 'select#issue_tracker_id option:selected'),
+    	diff                   = new Item('redmine_diff', diff_parser, localStorage, 'input.issue_custom_field_values_diff_url', 'select#issue_tracker_id option:selected'),
+    	diff_dm                = new Item('redmine_dm_diff', diff_dm_parser, localStorage, 'input.issue_custom_field_values_diff_datamodel', 'select#issue_tracker_id option:selected'),
+    	diff_cr                = new Item('redmine_cr_diff', diff_cr_parser, localStorage, 'input.issue_custom_field_values_diff_crontab', 'select#issue_tracker_id option:selected'),
+        task_type              = new Item('redmine_task_type', task_type_parser, localStorage, 'select.list_cf#issue_custom_field_values_4', 'select#issue_tracker_id option:selected');
 });
 
