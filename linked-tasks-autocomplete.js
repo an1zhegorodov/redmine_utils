@@ -26,23 +26,20 @@ $(document).ready(function() {
             this.storage.removeItem(this.key);
         },
         save: function() {
-            var el = this.element();
-            if (el == 404) {
+            if (this.parser.noElements()) {
                 return false;
             }
+            var el = this.parser.find();
             if (!el) {
                 this.remove();
                 return false;
             }
-            var data = this.element().text();
+            var data = this.el.text();
             if (data) {
                 this.storage.setItem(this.key, data);
             } else {
                 this.remove();
             }
-        },
-        element: function() {
-            return this.parser.find();
         },
         fetch: function() {
         	return this.storage.getItem(this.key);
@@ -69,11 +66,14 @@ $(document).ready(function() {
     
     Parser.prototype = {
         constructor: Parser,
+        noElements: function() {
+            return ($(this.query).length == 0) ? true : false;
+        },
         find: function() {
-            var results = $(this.query);
-            if (results.length == 0) {
-                return 404;
+            if (this.noElements()) {
+                return false;
             }
+            var results = $(this.query);
             if (results.length < this.elIndex) {
                 return false;
             }
@@ -88,10 +88,10 @@ $(document).ready(function() {
     
     SubjectParser.prototype = new Parser();
     SubjectParser.prototype.find = function() {
-    	var results = $(this.query);
-        if (results.length == 0) {
-            return 404;
+        if (this.noElements()) {
+            return false;
         }
+        var results = $(this.query);
         if (results.length < this.elIndex) {
             return false;
         }
