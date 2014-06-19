@@ -100,14 +100,14 @@ $(document).ready(function() {
     };
     
     var source_branches_query = 'table.attributes th:contains(Branch)',
-        source_subject_query = 'div.subject h3',
-		br_parser = new Parser(source_branches_query, 0),
-		br_dm_parser = new Parser(source_branches_query, 1),
-		br_cr_parser = new Parser(source_branches_query, 2),
-        subject_parser = new SubjectParser(source_subject_query, 0),
-        br = new Branch('redmine_branch', br_parser, localStorage, 'input.issue_custom_field_values_branch'),
-        br_dm = new Branch('redmine_dm_branch', br_dm_parser, localStorage, 'input.issue_custom_field_values_datamodel_branch'),
-        br_cr = new Branch('redmine_cr_branch', br_cr_parser, localStorage, 'input.issue_custom_field_values_crontab_branch'),
-    	subject = new Branch('redmine_subject', subject_parser, localStorage, 'input#issue_subject');
+        source_subject_query  = 'div.subject h3',
+        br_parser             = new Parser(source_branches_query, 0),
+        br_dm_parser          = new Parser(source_branches_query, 1),
+        br_cr_parser          = new Parser(source_branches_query, 2),
+        subject_parser        = new SubjectParser(source_subject_query, 0),
+        br                    = new Branch('redmine_branch', br_parser, localStorage, 'input.issue_custom_field_values_branch'),
+        br_dm                 = new Branch('redmine_dm_branch', br_dm_parser, localStorage, 'input.issue_custom_field_values_datamodel_branch'),
+        br_cr                 = new Branch('redmine_cr_branch', br_cr_parser, localStorage, 'input.issue_custom_field_values_crontab_branch'),
+    	subject               = new Branch('redmine_subject', subject_parser, localStorage, 'input#issue_subject');
 });
 
