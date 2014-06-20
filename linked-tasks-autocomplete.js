@@ -8,6 +8,22 @@
 
 
 $(document).ready(function() {
+    function Injector(container, injection) {
+        this.container = container;
+        this.injection = injection;
+        this.run();
+    }
+    Injector.prototype = {
+        constructor: Injector,
+        run: function() {
+            if (this.issue()) {
+                $(this.injection).insertAfter(this.container);
+            }
+        },
+        issue: function () {
+            return /issues\/\d+$/.test(document.URL);
+        }
+    };
     function Item(key, parser, storage, container, tracker_container) {
         this.key     = key;
         this.parser  = parser;
@@ -28,7 +44,7 @@ $(document).ready(function() {
             this.storage.removeItem(this.key);
         },
         save: function() {
-            if (this.parser.noElements()) {
+            if (!this.issue()) {
                 return false;
             }
             var el = this.parser.find();
@@ -47,7 +63,7 @@ $(document).ready(function() {
         	return this.storage.getItem(this.key);
         },
         push: function(container) {
-            if (!this.urlMatches()) {
+            if (!this.newIssue()) {
                 return false;
             }
             var data = this.fetch() || false;
@@ -55,8 +71,11 @@ $(document).ready(function() {
                 $(container).val(data);
             }
         },
-        urlMatches: function () {
-            return /new$/.test(document.URL);
+        newIssue: function () {
+            return /issues\/new#autofill$/.test(document.URL);
+        },
+        issue: function () {
+            return /issues\/\d+$/.test(document.URL);
         }
     };
 
@@ -130,6 +149,6 @@ $(document).ready(function() {
     	diff                   = new Item('redmine_diff', diff_parser, localStorage, 'input.issue_custom_field_values_diff_url', 'select#issue_tracker_id option:selected'),
     	diff_dm                = new Item('redmine_dm_diff', diff_dm_parser, localStorage, 'input.issue_custom_field_values_diff_datamodel', 'select#issue_tracker_id option:selected'),
     	diff_cr                = new Item('redmine_cr_diff', diff_cr_parser, localStorage, 'input.issue_custom_field_values_diff_crontab', 'select#issue_tracker_id option:selected'),
-        task_type              = new Item('redmine_task_type', task_type_parser, localStorage, 'select.list_cf#issue_custom_field_values_4', 'select#issue_tracker_id option:selected');
+        task_type              = new Item('redmine_task_type', task_type_parser, localStorage, 'select.list_cf#issue_custom_field_values_4', 'select#issue_tracker_id option:selected'),
+        injector               = new Injector('#main-menu :nth-child(5) a.new-issue', '<a href="/projects/sw/issues/new#autofill" class="new-issue">Новая задача (Hotfix)</a>');
 });
-
