@@ -24,6 +24,19 @@ $(document).ready(function() {
             return /issues\/\d+$/.test(document.URL);
         }
     };
+    function Tracker(tracker_container) {
+        this.container = tracker_container;
+        this.run();
+    }
+    Tracker.prototype = {
+        run: function() {
+            if (this.autofill())
+                $(this.container).val('31');
+        },
+        autofill: function() {
+            return /issues\/new#autofill$/.test(document.URL);
+        }
+    };
     function Item(key, parser, storage, container, tracker_container) {
         this.key     = key;
         this.parser  = parser;
