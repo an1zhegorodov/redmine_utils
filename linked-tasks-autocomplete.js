@@ -31,7 +31,7 @@ $(document).ready(function() {
     Tracker.prototype = {
         run: function() {
             if (this.autofill())
-                $(this.container).val('31');
+                $(this.container).val('31').trigger('change');
         },
         autofill: function() {
             return /issues\/new#autofill$/.test(document.URL);
@@ -163,5 +163,6 @@ $(document).ready(function() {
     	diff_dm                = new Item('redmine_dm_diff', diff_dm_parser, localStorage, 'input.issue_custom_field_values_diff_datamodel', 'select#issue_tracker_id option:selected'),
     	diff_cr                = new Item('redmine_cr_diff', diff_cr_parser, localStorage, 'input.issue_custom_field_values_diff_crontab', 'select#issue_tracker_id option:selected'),
         task_type              = new Item('redmine_task_type', task_type_parser, localStorage, 'select.list_cf#issue_custom_field_values_4', 'select#issue_tracker_id option:selected'),
-        injector               = new Injector('#main-menu :nth-child(5) a.new-issue', '<a href="/projects/sw/issues/new#autofill" class="new-issue">Новая задача (Hotfix)</a>');
+        injector               = new Injector('#main-menu :nth-child(5) a.new-issue', '<a href="/projects/sw/issues/new#autofill" class="new-issue">Новая задача (Hotfix)</a>'),
+        tracker                = new Tracker('select#issue_tracker_id');
 });
