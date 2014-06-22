@@ -8,128 +8,76 @@
 
 
 $(document).ready(function() {
-    function Item(key, parser, storage, container, tracker_container) {
-        this.key     = key;
-        this.parser  = parser;
-        this.storage = storage;
-        this.save();
-        var self = this;
-        $(document).ajaxComplete(function(){
-            if ($(tracker_container).val() == '31')
-        	self.push(container);
-        });
-        if ($(tracker_container).val() == '31')
-            this.push(container);
+    var config = {
+        'issues/\\d+$': {
+            'page': function(items) { return new Page(items);},
+            'items': [
+            {
+                    'item': function(selector) { return new Item(selector); },
+                    'params': ['table.attributes th:contains(Branch) + td :nth(1)'],
+                    'action': 'hasValue',
+            }],
+        },
+    };
+
+    function Addon(config) {
+        this.config = config;
     }
-        
+
+    Addon.prototype = {
+        constructor: Addon,
+        run: function() {
+            for (var pattern in this.config) {
+                var re = new RegExp(pattern);
+                if (re.test(document.URL)) {
+                    var page = this.config[pattern].page(this.config[pattern].items);
+                    page.act();
+                }
+            }
+        }
+    };
+
+    function Page(items) {
+        this.items = items;
+    }
+    Page.prototype = {
+        constructor: Page,
+        act: function() {
+            for (var i in this.items) {
+                var item = this.items[i].item.apply(this, this.items[i].params);
+                item[this.items[i].action]();
+            }
+        }
+    };
+
+    function Item(selector) {
+        this.element = $(selector);
+    }
     Item.prototype = {
         constructor: Item,
-        remove: function() {
-            this.storage.removeItem(this.key);
-        },
-        save: function() {
-            if (this.parser.noElements()) {
-                return false;
-            }
-            var el = this.parser.find();
-            if (!el) {
-                this.remove();
-                return false;
-            }
-            var data = el.text();
-            if (data) {
-                this.storage.setItem(this.key, data);
-            } else {
-                this.remove();
-            }
-        },
-        fetch: function() {
-        	return this.storage.getItem(this.key);
-        },
-        push: function(container) {
-            if (!this.urlMatches()) {
-                return false;
-            }
-            var data = this.fetch() || false;
-            if (data && $(container).length > 0) {
-                $(container).val(data);
-            }
-        },
-        urlMatches: function () {
-            return /new$/.test(document.URL);
+        hasValue: function() {
+            return this.element.val() || this.element.text();
         }
     };
 
-    function Parser(query, index) {
-        this.query = query;
-        this.elIndex = index;
+    function InjectableItem(selector, injector) {
+        Item.call(this, selector);
+        this.injector = injector;
     }
-    
-    Parser.prototype = {
-        constructor: Parser,
-        noElements: function() {
-            return ($(this.query).length == 0) ? true : false;
-        },
-        prepData: function(el) {
-            return el;
-        },
-        find: function() {
-            if (this.noElements()) {
-                return false;
-            }
-            var results = $(this.query);
-            if (results.length < this.elIndex) {
-                return false;
-            }
-            var el = this.prepData(results.eq(this.elIndex));
-            return (el.length == 0 || el.text() == '') ? false : el;
+
+    InjectableItem.prototype = {
+        constructor: InjectableItem,
+        inject: function() {
+            console.log('works');
         }
     };
 
-    function NextParser(query, index) {
-        Parser.call(this, query, index);
-    }
-
-    NextParser.prototype = new Parser();
-    NextParser.prototype.prepData = function(el) {
-        return el.next();
-    };
-    
-    function SubjectParser(query, index) {
-        Parser.call(this, query, index);
-    }
-    
-    SubjectParser.prototype = new Parser();
-
-    function DiffParser(query, index) {
-        Parser.call(this, query, index);
-    }
-
-    DiffParser.prototype = new Parser();
-    DiffParser.prototype.prepData = function(el) {
-        return el.next().children('a').eq(0);
-    };
-
+    var addon = new Addon(config);
+    addon.run();
     
     var source_branches_query  = 'table.attributes th:contains(Branch)',
         source_subject_query   = 'div.subject h3',
         source_diffs_query     = 'table.attributes th:contains(Diff)',
-        source_task_type_query = 'table.attributes th:contains(Task type)',
-        br_parser              = new NextParser(source_branches_query, 0),
-        br_dm_parser           = new NextParser(source_branches_query, 1),
-        br_cr_parser           = new NextParser(source_branches_query, 2),
-        subject_parser         = new SubjectParser(source_subject_query, 0),
-        task_type_parser       = new NextParser(source_task_type_query, 0),
-        diff_parser            = new DiffParser(source_diffs_query, 0),
-        diff_dm_parser         = new DiffParser(source_diffs_query, 1),
-        diff_cr_parser         = new DiffParser(source_diffs_query, 2),
-        br                     = new Item('redmine_branch', br_parser, localStorage, 'input.issue_custom_field_values_branch', 'select#issue_tracker_id option:selected'),
-        br_dm                  = new Item('redmine_dm_branch', br_dm_parser, localStorage, 'input.issue_custom_field_values_datamodel_branch', 'select#issue_tracker_id option:selected'),
-        br_cr                  = new Item('redmine_cr_branch', br_cr_parser, localStorage, 'input.issue_custom_field_values_crontab_branch', 'select#issue_tracker_id option:selected'),
-    	subject                = new Item('redmine_subject', subject_parser, localStorage, 'input#issue_subject', 'select#issue_tracker_id option:selected'),
-    	diff                   = new Item('redmine_diff', diff_parser, localStorage, 'input.issue_custom_field_values_diff_url', 'select#issue_tracker_id option:selected'),
-    	diff_dm                = new Item('redmine_dm_diff', diff_dm_parser, localStorage, 'input.issue_custom_field_values_diff_datamodel', 'select#issue_tracker_id option:selected'),
-    	diff_cr                = new Item('redmine_cr_diff', diff_cr_parser, localStorage, 'input.issue_custom_field_values_diff_crontab', 'select#issue_tracker_id option:selected'),
-        task_type              = new Item('redmine_task_type', task_type_parser, localStorage, 'select.list_cf#issue_custom_field_values_4', 'select#issue_tracker_id option:selected');
+        source_task_type_query = 'table.attributes th:contains(Task type)';
 });
 
